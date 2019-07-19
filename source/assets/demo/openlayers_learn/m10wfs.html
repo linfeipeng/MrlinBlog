@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!--<link rel="stylesheet" href="https://openlayers.org/en/v4.6.5/css/ol.css" type="text/css">-->
+    <link rel="stylesheet" href="libweb/v4.6.4-dist/ol.css" type="text/css">
+    <style>
+        .map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+    <!--<script src="https://openlayers.org/en/v4.6.5/build/ol.js" type="text/javascript"></script>-->
+    <script src="libweb/v4.6.4-dist/ol.js" type="text/javascript"></script>
+    <script src="libweb/jquery-2.1.4.min.js" type="text/javascript"></script>
+    <title>OpenLayers example</title>
+</head>
+<body>
+<h2>My Map</h2>
+<div id="map" class="map"></div>
+<script type="text/javascript">
+
+//    http://localhost:8080/geoserver/test01/wms?service=WMS&version=1.1.0&request=GetMap&layers=test01:trggjson&styles=&bbox=119.99999959039825,39.999999739590955,120.0,40.0&width=768&height=488&srs=EPSG:4326&format=application/openlayers
+
+//http://localhost:8080/geoserver/test01/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test01:trggjson&maxFeatures=50&outputFormat=application%2Fjson
+
+
+var fillpt = new ol.style.Fill({
+    color: 'rgba(255,255,0,0.5)'
+});
+var fill = new ol.style.Fill({
+    color: 'rgba(255,0,0,0.5)'
+});
+var stroke = new ol.style.Stroke({
+    color: '#3399CC',
+    width: 1.25
+});
+
+var styles = [
+    new ol.style.Style({
+//            image: new ol.style.Icon({
+//                src: "GreenPin1LargeB.png"
+//            })
+        image: new ol.style.Circle({
+            fill: fillpt,
+            stroke: stroke,
+            radius: 15
+        })
+
+
+    })
+];
+
+var vLayer;
+
+function doSucess(gjson){
+
+
+    //    vLayer
+    vLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            features: (new ol.format.GeoJSON()).readFeatures(gjson,{featureProjection:"EPSG:3857"})
+//        features:[feature]
+        }),
+        style:styles[0]
+    });
+
+
+    var map = new ol.Map({
+        target: 'map',
+        layers: [
+
+            new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    url:'http://t0.tianditu.com/DataServer?T=vec_w&x={x}&y={y}&l={z}'
+//                    url: 'https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png' +
+//                    '?apikey=Your API key from http://www.thunderforest.com/docs/apikeys/ here'
+                })
+            }),
+            new ol.layer.Tile({
+                source: new ol.source.XYZ({
+//                       http://t6.tianditu.com/DataServer?T=cva_w&x=53&y=24&l=6
+                    url:'http://t6.tianditu.com/DataServer?T=cva_w&x={x}&y={y}&l={z}'
+//                    url: 'https://{a-c}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png' +
+//                    '?apikey=Your API key from http://www.thunderforest.com/docs/apikeys/ here'
+                })
+            }),
+            vLayer
+//            ,
+//            layers[0]
+
+//            new ol.layer.Tile({
+//                source: new ol.source.OSM()
+//            })
+        ],
+        view: new ol.View({
+            center: ol.proj.fromLonLat([37.41, 8.82]),
+            zoom: 4
+        })
+    });
+
+
+}
+
+
+$.ajax({
+    url: "http://localhost:8080/geoserver/test01/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=test01:trggjson&maxFeatures=50&outputFormat=application%2Fjson",
+    success: function(msg){
+        alert( "Data Saved: " + msg );
+        console.log(msg);
+
+
+        doSucess(msg);
+
+
+
+
+
+
+    }
+});
+
+//
+//    var layers = [
+//        new ol.layer.Tile({
+////            extent: [-13884991, 2870341, -7455066, 6338219],
+//            source: new ol.source.TileWMS({
+//                url: 'http://localhost:8080/geoserver/test01/wms',
+//                params: {'LAYERS': 'test01:trggjson', 'TILED': true},
+//                serverType: 'geoserver',
+//                // Countries have transparency, so do not fade tiles:
+//                transition: 0
+//            })
+//        })
+//    ];
+
+
+
+
+</script>
+</body>
+</html>
